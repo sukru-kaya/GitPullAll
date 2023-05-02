@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GitPullAll": {
+      "commandName": "Project",
+      "commandLineArgs": "G:"
+    }
+  }
+}

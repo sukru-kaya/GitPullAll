@@ -1,13 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using Microsoft.Extensions.Configuration;
+using System.Linq;
 
 namespace GitPullAll
 {
     class Program
     {
-        private static IConfiguration configuration;
+        private static string gitPath;
+        private static string[] excludedFolders;
         
         static void Main(string[] args)
         {
@@ -15,7 +18,9 @@ namespace GitPullAll
             builder.SetBasePath(Directory.GetCurrentDirectory())
                    .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            configuration = builder.Build();
+            var configuration = builder.Build();
+            gitPath = configuration["GitPath"];
+            excludedFolders = configuration.GetSection("ExcludedFolders").GetChildren().Select(x => x.Value).ToArray();
 
             if (args != null && args.Length > 0)
             {
@@ -32,6 +37,9 @@ namespace GitPullAll
 
         private static void PullAll(string path)
         {
+            if (excludedFolders != null && excludedFolders.Contains(path))
+                return;
+
             try
             {
                 string[] folders = System.IO.Directory.GetDirectories(path);
@@ -54,9 +62,10 @@ namespace GitPullAll
                     Console.WriteLine();
                     Console.WriteLine($"Pulling: {path}");
                     Console.ForegroundColor = ConsoleColor.Green;
-                    string processInfo = configuration["GitPath"];
+                    string processInfo = gitPath;
                     var process = Process.Start(processInfo, $"-C {path} pull");
                     process.WaitForExit();
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
             }
             catch (Exception ex)

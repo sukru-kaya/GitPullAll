@@ -1,12 +1,22 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
+using Microsoft.Extensions.Configuration;
 
 namespace GitPullAll
 {
     class Program
     {
+        private static IConfiguration configuration;
+        
         static void Main(string[] args)
         {
+            var builder = new ConfigurationBuilder();
+            builder.SetBasePath(Directory.GetCurrentDirectory())
+                   .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            configuration = builder.Build();
+
             if (args != null && args.Length > 0)
             {
                 foreach (var arg in args)
@@ -44,7 +54,7 @@ namespace GitPullAll
                     Console.WriteLine();
                     Console.WriteLine($"Pulling: {path}");
                     Console.ForegroundColor = ConsoleColor.Green;
-                    string processInfo = $"C:\\Program Files\\Git\\bin\\git.exe";
+                    string processInfo = configuration["GitPath"];
                     var process = Process.Start(processInfo, $"-C {path} pull");
                     process.WaitForExit();
                 }

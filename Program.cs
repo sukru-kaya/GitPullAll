@@ -24,9 +24,12 @@ namespace GitPullAll
 
             if (args != null && args.Length > 0)
             {
+                bool recursive = args.Contains("-r") || args.Contains("-recursive");
+                args = args.Where(x => x != "-r" && x != "-recursive").ToArray();
+
                 foreach (var arg in args)
                 {
-                    PullAll(arg);
+                    PullAll(arg, recursive);
                 }
             }
             else
@@ -35,7 +38,7 @@ namespace GitPullAll
             }            
         }
 
-        private static void PullAll(string path)
+        private static void PullAll(string path, bool recursive)
         {
             if (excludedFolders != null && excludedFolders.Contains(path))
                 return;
@@ -53,7 +56,8 @@ namespace GitPullAll
                         break;
                     }
 
-                    PullAll(folder);
+                    if (recursive)
+                        PullAll(folder, recursive);
                 }
 
                 if (isGitRepository)
@@ -82,7 +86,7 @@ namespace GitPullAll
         {
             Console.WriteLine("Git Pull All v1.0, 2023");
             Console.WriteLine();
-            Console.WriteLine("Usage: " + Process.GetCurrentProcess().MainModule?.FileName + " path1 [path2...]");
+            Console.WriteLine("Usage: " + Process.GetCurrentProcess().MainModule?.FileName + " path1 [path2...] [-r|-recursive]");
             Console.WriteLine();
         }
     }
